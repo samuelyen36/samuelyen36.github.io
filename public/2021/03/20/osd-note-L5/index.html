@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="en"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content=""><title>OSD_L5_note | Sam's blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=1.0.0"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/normalize.css/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/pure-min.min.css"><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/purecss/build/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script><link rel="icon" mask="" sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+ga('create','UA-198020762-1','auto');ga('send','pageview');
+</script><script type="text/javascript" src="//cdn.jsdelivr.net/npm/clipboard/dist/clipboard.min.js"></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.js"></script><link rel="stylesheet" href="//cdn.jsdelivr.net/gh/codeseven/toastr/build/toastr.min.css"><meta name="generator" content="Hexo 5.4.0"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">OSD_L5_note</h1><a id="logo" href="/.">Sam's blog</a><p class="description">Personal blog of Sam</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> Home</i></a><a href="/archives/"><i class="fa fa-archive"> Archive</i></a><a href="/about/"><i class="fa fa-user"> About</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">OSD_L5_note</h1><div class="post-meta">2021-03-20<span> | </span><span class="category"><a href="/categories/%E8%B3%87%E5%B7%A5/">資工</a></span><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><div class="post-content"><h1 id="L5-Interrupt-and-interrupt-handling-II"><a href="#L5-Interrupt-and-interrupt-handling-II" class="headerlink" title="L5 Interrupt and interrupt handling II"></a>L5 Interrupt and interrupt handling II</h1><ul>
+<li>CPU在執行main program的時候有可能context switch到interrupt handling的code<br><img src="https://i.imgur.com/ti6tYIn.png"></li>
+</ul>
+<p><img src="https://i.imgur.com/Gumpk00.png"></p>
+<ul>
+<li><p>PIC: programmable interrupt controller</p>
+</li>
+<li><p>Exception通常是synchornous的，Interrupt通常是asynchornous</p>
+</li>
+<li><p>Exception frame<br><img src="https://i.imgur.com/fPnSWbd.png"></p>
+</li>
+<li><p><img src="https://i.imgur.com/NwNTKPT.png"></p>
+</li>
+<li><p>Interrupt latency: Interrupt發生到開始執行第一行的Interrupt handler的時間</p>
+</li>
+<li><p>RTOS通常會在意interrupt latency</p>
+</li>
+</ul>
+<p><img src="https://i.imgur.com/EaFyKEn.png"></p>
+<ul>
+<li><p>software operations</p>
+</li>
+<li><p>Interrupt handling可以分前半後半</p>
+<ul>
+<li>前半: diable interrupt，處理比較critical的東西</li>
+<li>後半: enable interrupt，跟interrupt相關的task</li>
+</ul>
+</li>
+<li><p>In interrupt handler, many APIs can’t be called. For example, sleep.</p>
+</li>
+<li><p>Driver內部寫的function call需要跟kernel註冊<br><img src="https://i.imgur.com/mYSiGpw.png"></p>
+</li>
+</ul>
+<p><img src="https://i.imgur.com/Gi1fvfV.png"><br>by default寫tasklet，除非是time critical就寫softirq</p>
+<h2 id="Discussion"><a href="#Discussion" class="headerlink" title="Discussion"></a>Discussion</h2><ul>
+<li><p>做top half, bottom half的原因</p>
+<ul>
+<li>做多工，寧運整個interrupt變久，也要分成兩塊來做</li>
+<li>希望重要的工作快做完(top half)，比較沒那麼重要的等之後再做</li>
+</ul>
+</li>
+<li><p>Interrupt</p>
+<ul>
+<li>WorkQueue<ul>
+<li>Top half做完後，bottom half放在queue</li>
+<li>固定一個daemon看著處理</li>
+<li>優點：簡單</li>
+<li>缺點：Interrupt不知道拿時可以做完</li>
+<li>適合：不用急的事情（ex. printer）</li>
+</ul>
+</li>
+<li>Tasklet</li>
+<li>SoftIRQ<ul>
+<li>top half做完，bottom half放在queue裡面</li>
+<li>每次做完top half就去看queue，看有沒有人在queue排隊，就去那邊執行</li>
+<li>優點： 很快有效率</li>
+<li>缺點： 要依照特定格式來寫，很複雜</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div><div class="tags"><a href="/tags/OSDI/"><i class="fa fa-tag"></i>OSDI</a></div><div class="post-nav"><a class="pre" href="/2021/04/06/osd-note-L6/">OSD_L6_note</a><a class="next" href="/2021/03/18/OSD-note-L4/">OSD_L4_note</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="https://samuelyen36.github.io"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Categories</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%9C%AD%E8%A8%98/">札記</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E8%B3%87%E5%B7%A5/">資工</a><span class="category-list-count">10</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/OSDI/" style="font-size: 15px;">OSDI</a> <a href="/tags/%E9%97%9C%E6%96%BC%E9%83%A8%E8%90%BD%E6%A0%BC/" style="font-size: 15px;">關於部落格</a> <a href="/tags/%E6%AD%8C/" style="font-size: 15px;">歌</a> <a href="/tags/%E9%81%8A%E8%A8%98/" style="font-size: 15px;">遊記</a> <a href="/tags/Modern-C/" style="font-size: 15px;">Modern_C++</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Recent</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2021/06/17/mod-cpp-ch2-1/">Modern C++ - Ch2.1 Constant</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/29/trip-20210529/">遊記 - 武嶺</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/05/23/trip-20210430/">遊記 - 新竹北埔、五峰、南寮</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/20/osd-note-L8/">OSD_L8_note</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/13/osd-note-L7/">OSD_L7_note</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/04/06/osd-note-L6/">OSD_L6_note</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/20/osd-note-L5/">OSD_L5_note</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/18/OSD-note-L4/">OSD_L4_note</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/18/OSD-note-L3/">OSD_L3_note</a></li><li class="post-list-item"><a class="post-list-link" href="/2021/03/18/OSD-lab-2/">OSD_lab2</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Links</i></div><ul></ul><a href="https://github.com/samuelyen36" title="github" target="_blank">github</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2021 <a href="/." rel="nofollow">Sam's blog.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=1.0.0" async></script><script type="text/javascript" src="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=1.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox/dist/jquery.fancybox.min.css"><script type="text/javascript" src="/js/copycode.js" successtext="Copy Successed!"></script><link rel="stylesheet" type="text/css" href="/css/copycode.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=1.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=1.0.0"></script></div></body></html>
