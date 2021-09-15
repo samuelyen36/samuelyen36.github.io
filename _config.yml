@@ -11,6 +11,10 @@ author: Samuel Yen
 language: en
 timezone: ''
 
+sitemap: 
+  path: sitemap.xml
+
+
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
 url: https://samuelyen36.github.io
@@ -106,3 +110,4 @@ deploy:
   repo: https://github.com/samuelyen36/samuelyen36.github.io
   branch: master
   messages: "update of blog"
+  token: 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
